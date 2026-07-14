@@ -282,9 +282,9 @@ function App() {
       <button className="mobile-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
         <i className="fas fa-bars"></i>
       </button>
-      {isSidebarOpen && <div className="sidebar-overlay show" onClick={() => setIsSidebarOpen(false)}></div>}
 
       <div className="app-layout">
+        {isSidebarOpen && <div className="sidebar-overlay show" onClick={() => setIsSidebarOpen(false)}></div>}
         <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
           <div className="logo">
             <div className="logo-icon"><i className="fas fa-bolt"></i></div>
