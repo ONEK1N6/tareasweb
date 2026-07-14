@@ -711,6 +711,8 @@
       .sidebar {
         position: fixed;
         left: -280px;
+        width: 280px;
+        bottom: 0;
         z-index: 100;
         transition: left 0.3s ease;
         box-shadow: var(--shadow-lg);
@@ -720,8 +722,9 @@
       .app-layout { grid-template-columns: 1fr; }
       .main-content { padding: 70px 18px 28px; }
       .page-header { flex-direction: column; align-items: flex-start; gap: 14px; }
-      .toolbar { flex-direction: column; }
+      .toolbar { flex-direction: column; align-items: stretch; }
       .search-box { min-width: 100%; }
+      .filter-select { width: 100%; }
       .form-row { grid-template-columns: 1fr; }
       .task-actions { opacity: 1; }
     }
@@ -729,6 +732,11 @@
       .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
       .stat-card { padding: 14px 16px; }
       .stat-number { font-size: 22px; }
+      .task-item { padding: 12px 14px; gap: 10px; flex-wrap: wrap; }
+      .task-actions { width: 100%; justify-content: flex-end; }
+      .page-title { font-size: 24px; }
+      .btn { width: 100%; justify-content: center; }
+      .header-actions { width: 100%; flex-direction: column; }
     }
 
     /* === SCROLL REVEAL === */
