@@ -279,9 +279,11 @@ function App() {
         <div className="orb orb-3"></div>
       </div>
 
-      <button className="mobile-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-        <i className="fas fa-bars"></i>
-      </button>
+      {!isSidebarOpen && (
+        <button className="mobile-toggle" onClick={() => setIsSidebarOpen(true)}>
+          <i className="fas fa-bars"></i>
+        </button>
+      )}
 
       <div className="app-layout">
         {isSidebarOpen && <div className="sidebar-overlay show" onClick={() => setIsSidebarOpen(false)}></div>}
