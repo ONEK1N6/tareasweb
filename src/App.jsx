@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from './supabaseClient';
 import './index.css';
 
@@ -11,6 +11,98 @@ const CATEGORIES = {
 };
 
 const PRIORITY_ORDER = { alta: 0, media: 1, baja: 2 };
+
+const PRIORITY_OPTIONS_FILTER = [
+  { value: 'all', label: 'Todas las prioridades', icon: 'fas fa-layer-group' },
+  { value: 'alta', label: 'Alta Prioridad', icon: 'fas fa-flag', color: 'var(--danger)' },
+  { value: 'media', label: 'Media Prioridad', icon: 'fas fa-flag', color: 'var(--warning)' },
+  { value: 'baja', label: 'Baja Prioridad', icon: 'fas fa-flag', color: 'var(--accent)' },
+];
+
+const SORT_OPTIONS = [
+  { value: 'created', label: 'Más recientes', icon: 'fas fa-clock' },
+  { value: 'dueDate', label: 'Fecha de vencimiento', icon: 'fas fa-calendar-alt' },
+  { value: 'priority', label: 'Prioridad', icon: 'fas fa-sort-amount-down' },
+  { value: 'name', label: 'Nombre A-Z', icon: 'fas fa-sort-alpha-down' },
+];
+
+const PRIORITY_OPTIONS_FORM = [
+  { value: 'media', label: 'Media', icon: 'fas fa-flag', color: 'var(--warning)' },
+  { value: 'alta', label: 'Alta', icon: 'fas fa-flag', color: 'var(--danger)' },
+  { value: 'baja', label: 'Baja', icon: 'fas fa-flag', color: 'var(--accent)' },
+];
+
+const CATEGORY_OPTIONS_FORM = Object.entries(CATEGORIES).map(([key, cat]) => ({
+  value: key,
+  label: cat.label,
+  dot: cat.color,
+}));
+
+function CustomSelect({ name, value, defaultValue, onChange, options, className }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [internalValue, setInternalValue] = useState(value !== undefined ? value : defaultValue);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (value !== undefined) {
+      setInternalValue(value);
+    }
+  }, [value]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(opt => opt.value === internalValue) || options[0];
+
+  const handleSelect = (optValue) => {
+    setInternalValue(optValue);
+    if (onChange) onChange(optValue);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className={`custom-select-container ${className || ''} ${isOpen ? 'dropdown-open' : ''}`} ref={dropdownRef}>
+      {name && <input type="hidden" name={name} value={internalValue || ''} />}
+      <div 
+        className={`custom-select-trigger ${isOpen ? 'open' : ''}`} 
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className="custom-select-label">
+          {selectedOption?.icon && <i className={`${selectedOption.icon} option-icon`} style={{ color: selectedOption.color }}></i>}
+          {selectedOption?.dot && <span className="category-dot" style={{ background: selectedOption.dot }}></span>}
+          {selectedOption?.label}
+        </span>
+        <i className={`fas fa-chevron-down arrow-icon ${isOpen ? 'rotate' : ''}`}></i>
+      </div>
+
+      {isOpen && (
+        <div className="custom-select-dropdown">
+          {options.map((opt) => (
+            <div 
+              key={opt.value} 
+              className={`custom-select-option ${opt.value === internalValue ? 'selected' : ''}`}
+              onClick={() => handleSelect(opt.value)}
+            >
+              <div className="option-content">
+                {opt.icon && <i className={`${opt.icon} option-icon`} style={{ color: opt.color }}></i>}
+                {opt.dot && <span className="category-dot" style={{ background: opt.dot }}></span>}
+                <span>{opt.label}</span>
+              </div>
+              {opt.value === internalValue && <i className="fas fa-check check-icon"></i>}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -420,18 +512,18 @@ function App() {
               <i className="fas fa-search"></i>
               <input type="text" placeholder="Buscar tareas..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
             </div>
-            <select className="filter-select" value={priorityFilter} onChange={e => setPriorityFilter(e.target.value)}>
-              <option value="all">Todas las prioridades</option>
-              <option value="alta">Alta</option>
-              <option value="media">Media</option>
-              <option value="baja">Baja</option>
-            </select>
-            <select className="filter-select" value={sortBy} onChange={e => setSortBy(e.target.value)}>
-              <option value="created">Más recientes</option>
-              <option value="dueDate">Fecha de vencimiento</option>
-              <option value="priority">Prioridad</option>
-              <option value="name">Nombre A-Z</option>
-            </select>
+            <CustomSelect 
+              className="filter-select" 
+              value={priorityFilter} 
+              onChange={val => setPriorityFilter(val)}
+              options={PRIORITY_OPTIONS_FILTER}
+            />
+            <CustomSelect 
+              className="filter-select" 
+              value={sortBy} 
+              onChange={val => setSortBy(val)}
+              options={SORT_OPTIONS}
+            />
           </div>
 
           <section className="task-list">
@@ -513,16 +605,21 @@ function App() {
                 <div className="form-row">
                   <div className="form-group">
                     <label className="form-label">Prioridad</label>
-                    <select name="priority" className="form-select" defaultValue={taskModal.task?.priority || 'media'}>
-                      <option value="media">Media</option><option value="alta">Alta</option><option value="baja">Baja</option>
-                    </select>
+                    <CustomSelect 
+                      name="priority" 
+                      className="form-select" 
+                      defaultValue={taskModal.task?.priority || 'media'}
+                      options={PRIORITY_OPTIONS_FORM}
+                    />
                   </div>
                   <div className="form-group">
                     <label className="form-label">Categoría</label>
-                    <select name="category" className="form-select" defaultValue={taskModal.task?.category || 'personal'}>
-                      <option value="personal">Personal</option><option value="trabajo">Trabajo</option>
-                      <option value="salud">Salud</option><option value="estudio">Estudio</option><option value="hogar">Hogar</option>
-                    </select>
+                    <CustomSelect 
+                      name="category" 
+                      className="form-select" 
+                      defaultValue={taskModal.task?.category || 'personal'}
+                      options={CATEGORY_OPTIONS_FORM}
+                    />
                   </div>
                 </div>
                 <div className="form-group">
