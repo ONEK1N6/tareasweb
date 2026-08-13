@@ -660,11 +660,20 @@ function App() {
         <div className="modal-overlay show" onClick={() => setDetailModal({ open: false, task: null })}>
           <div className="modal" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2 className="modal-title">{detailModal.task.title}</h2>
+              <h2 className="modal-title">Detalle de la tarea</h2>
               <button className="modal-close" onClick={() => setDetailModal({ open: false, task: null })}><i className="fas fa-times"></i></button>
             </div>
-            <div className="modal-body">
-              <p>{detailModal.task.description || 'Sin descripción'}</p>
+            <div className="modal-body" style={{ padding: '16px 24px' }}>
+              <div className="detail-row">
+                <span className="detail-label">Título:</span>
+                <span className="detail-value" style={{ fontSize: '15px', fontWeight: '600', color: 'var(--accent)' }}>{detailModal.task.title}</span>
+              </div>
+              <div className="detail-row" style={{ flexDirection: 'column', borderBottom: 'none', gap: '8px', paddingTop: '16px' }}>
+                <span className="detail-label">Descripción:</span>
+                <div className="detail-value" style={{ whiteSpace: 'pre-wrap', width: '100%', background: 'var(--bg-card)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border)', lineHeight: '1.6' }}>
+                  {detailModal.task.description || 'Sin descripción'}
+                </div>
+              </div>
             </div>
             <div className="modal-footer">
               <button className="btn btn-ghost" onClick={() => setDetailModal({ open: false, task: null })}>Cerrar</button>
